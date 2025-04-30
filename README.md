@@ -5,4 +5,6 @@
 
 ## ffmpeg 활용 생성 비디오 Snapshot
 ![ffmpeg 활용 생성 비디오](./cutout_video_snapshot.png)
-- 비디오 파일도 다운로드 가능
+
+## ffmpeg 활용 생성 비디오
+![ffmpeg 활용 생성 비디오](./cutout_test.gif)
