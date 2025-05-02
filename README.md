@@ -5,9 +5,9 @@
 ![3D 산점도](./3d_scatter_plot.png)
 
 
-## ffmpeg 활용 생성 비디오1
+## ESmini, ffmpeg 활용 생성 비디오1
 ![ffmpeg 활용 생성 비디오](./cutout_test2.gif)
 
 
-## ffmpeg 활용 생성 비디오2
+## ESmini, ffmpeg 활용 생성 비디오2
 ![ffmpeg 활용 생성 비디오](./cutout_test3.gif)
