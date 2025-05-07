@@ -1,0 +1,5 @@
+# UN R157 2023년 1월 개정안 기준 적용
+# 환경 유형, 날씨 조건, 가시성(m), 도로 마찰계수, 주행 가능 여부
+highway_clear, clear, 1000, 0.9, true
+highway_rain, rain, 300, 0.7, true
+highway_fog, fog, 100, 0.8, true

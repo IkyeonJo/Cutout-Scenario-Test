@@ -1,0 +1,138 @@
+# Cut-out 시나리오 테스트 설정 파일
+scenario:
+  name: "Cut-out 시나리오 테스트"
+  description: "선행차량 이탈 후 다른 차량 출현 상황에서 ADS 성능 평가"
+  author: "자율주행 테스트 엔지니어"
+  version: "1.0"
+
+# 환경 설정
+environment:
+  road_network:
+    road_file: "highway.xodr"
+    lane_width: 3.5  # 고속도로 표준 차선 폭(m)
+    number_of_lanes: 3
+    start_lane_id: 2  # 시나리오 시작 시 차량이 위치할 차선 ID
+    coordinate_system:
+      s_direction: "decreasing"  # s값 클수록 후방
+  
+  weather_conditions:
+    type: "clear"  # clear, rain, fog 등
+    visibility: 1000.0  # 가시성(m)
+    
+  time_of_day: "day"  # day, night, dusk, dawn
+
+# 차량 파라미터
+vehicles:
+  # 대상 차량(Ego) 설정
+  ego_vehicle:
+    name: "ego"
+    model: "car_sedan"
+    category: "car"
+    dimensions:
+      length: 5.0  # 기본 3D 모델 길이(m)
+      width: 2.0   # 차량 폭(m)
+      height: 1.8  # 차량 높이(m)
+    longitudinal_velocity:
+      min: 60.0  # 최소 속도(km/h)
+      max: 120.0  # 최대 속도(km/h)
+      step: 10.0  # 속도 간격(km/h)
+  
+  # 목표 차량 1(LV1 - Cutting Out) 설정
+  lead_vehicle_1:
+    name: "LV1"
+    model: "car_sedan"
+    category: "car"
+    dimensions:
+      length: 4.8  # 표준 세단 길이(m)
+      width: 1.8   # 차량 폭(m)
+      height: 1.5  # 차량 높이(m)
+    longitudinal_velocity:
+      min: 40.0  # 최소 속도(km/h)
+      max: 100.0  # 최대 속도(km/h)
+      step: 10.0  # 속도 간격(km/h)
+    lateral_velocity:
+      min: 0.5  # 최소 횡방향 속도(m/s)
+      max: 3.0  # 최대 횡방향 속도(m/s)
+      step: 0.5  # 횡방향 속도 간격(m/s)
+    initial_thw:
+      min: 1.0  # 최소 초기 시간 헤드웨이(s)
+      max: 3.0  # 최대 초기 시간 헤드웨이(s)
+      step: 0.5  # 시간 헤드웨이 간격(s)
+    lane_change:
+      direction: -1  # -1: 좌측 차선 변경, +1: 우측 차선 변경
+      
+  # 목표 차량 2(LV2 - Revealed) 설정
+  lead_vehicle_2:
+    name: "LV2"
+    model: "car_sedan"
+    category: "car"
+    dimensions:
+      length: 4.8  # 표준 세단 길이(m)
+      width: 1.8   # 차량 폭(m)
+      height: 1.5  # 차량 높이(m)
+    longitudinal_velocity:
+      min: 30.0  # 최소 속도(km/h)
+      max: 90.0  # 최대 속도(km/h)
+      step: 10.0  # 속도 간격(km/h)
+    longitudinal_deceleration:
+      min: 0.0  # 최소 감속도(m/s²)
+      max: 4.0  # 최대 감속도(m/s²)
+      step: 1.0  # 감속도 간격(m/s²)
+    reveal_thw:
+      min: 1.0  # 최소 드러난 시점 시간 헤드웨이(s)
+      max: 3.0  # 최대 드러난 시점 시간 헤드웨이(s)
+      step: 0.5  # 시간 헤드웨이 간격(s)
+    deceleration_settings:
+      dynamics_dimension: "rate"  # 감속 방식 (rate, time, distance)
+      trigger_delay: 0.1  # 드러난 후 감속 시작까지의 지연 시간(s)
+
+# UN R157 2023년 1월 개정안 기준 제어 모델 설정
+control_models:
+  human_model:
+    reaction_time: 0.75  # 인간 운전자 반응 시간(s) - UN R157 2023년 1월 개정안 기준
+    max_deceleration: 5.0  # 인간 운전자 최대 감속도(m/s²) - UN R157 2023년 1월 개정안 기준
+    deceleration_buildup_time: 0.4  # 최대 감속도에 도달하는 시간(s)
+    
+  ads_model:
+    reaction_time: 0.5  # 자율주행 반응 시간(s) - UN R157 2023년 1월 개정안 기준
+    max_deceleration: 6.0  # 자율주행 최대 감속도(m/s²) - UN R157 2023년 1월 개정안 기준
+    deceleration_buildup_time: 0.2  # 최대 감속도에 도달하는 시간(s)
+
+# 필터링 및 평가 설정
+filtering:
+  safety_parameters:
+    min_safe_distance: 0.5  # 최소 안전 이격 거리(m)
+    
+  evaluation_criteria:
+    human_failure_offset: -0.5  # Human 모델 실패 평가 보정 상수
+    ads_failure_offset: 0.2  # ADS 모델 실패 평가 보정 상수
+    
+  logical_conditions:
+    # 물리적으로 불가능한 조합 필터링
+    physical_validity_conditions:
+      - "thw_ego_lv2_reveal <= thw_ego_lv1"
+      - "v_lv2_long > v_ego and dec_lv2_long == 0"
+
+# 시뮬레이션 및 샘플링 설정
+simulation:
+  time_step: 0.01  # 시뮬레이션 시간 단계(s)
+  duration: 30.0  # 시뮬레이션 지속 시간(s)
+  random_seed: 42  # 재현성을 위한 랜덤 시드
+  
+  sampling:
+    v_ego_groups: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110]  # v_ego 그룹화 값(km/h)
+    target_sample_count: 30  # 최종 테스트 케이스 목표 개수
+    prioritize_by: "TTC_reveal"  # 샘플링 우선순위 기준 (낮은 값 우선)
+    
+  output:
+    frame_rate: 30  # 비디오 프레임 레이트(fps)
+    output_directory: "./output"  # 결과 저장 경로
+    excel_report_name: "cut_out_scenarios_report.xlsx"  # 엑셀 리포트 파일명
+    video_format: "mp4"  # 비디오 형식
+    
+  esmini:
+    executable_path: "./esmini/bin/esmini"  # ESmini 실행 파일 경로
+    options:
+      - "--window 60 60 800 400"  # 창 위치 및 크기
+      - "--headless"  # 헤드리스 모드 (선택 사항)
+      - "--record on"  # 기록 활성화

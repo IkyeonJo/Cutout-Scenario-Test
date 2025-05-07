@@ -1,0 +1,6 @@
+# Cut-out 시나리오 테스트 필요 패키지
+numpy>=1.20.0
+PyYAML>=6.0
+openpyxl>=3.0.9
+plotly>=5.7.0
+scenariogeneration>=0.9.0  # OpenSCENARIO 생성을 위한 패키지
